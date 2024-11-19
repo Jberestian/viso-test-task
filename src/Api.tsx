@@ -23,7 +23,7 @@ const App: React.FC = () => {
     const fetchMeal = async () => {
       try {
         const response = await axios.get<{ meals: Meal[] | null }>(
-          "https://www.themealdb.com/api/json/v1/1/search.php?f=a"
+          "https://www.themealdb.com/api/json/v1/1/filter.php?i=chicken_breast"
         );
         const data = response.data.meals;
 

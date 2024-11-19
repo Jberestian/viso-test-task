@@ -23,85 +23,112 @@
 //   );
 // }
 
-// export default App;
-
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
-// Define the structure of the data
 interface Meal {
   idMeal: string;
   strMeal: string;
-  strDrinkAlternate: string | null;
   strCategory: string;
   strArea: string;
   strInstructions: string;
   strMealThumb: string;
   strTags: string | null;
   strYoutube: string;
-  [key: string]: any; // To handle additional dynamic fields
+  [key: string]: any;
 }
 
 const App: React.FC = () => {
-  const [meal, setMeal] = useState<Meal | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [meals, setMeals] = useState<Meal[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const handleSearch = async () => {
+    try {
+      const response = await axios.get<{ meals: Meal[] | null }>(
+        `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchQuery}`
+      );
+      const data = response.data.meals;
 
-  useEffect(() => {
-    const fetchMeal = async () => {
-      try {
-        const response = await axios.get<{ meals: Meal[] | null }>(
-          "https://www.themealdb.com/api/json/v1/1/search.php?s=Arrabiata"
-        );
-        const data = response.data.meals;
-
-        if (data && data.length > 0) {
-          setMeal(data[0]); // Assuming we want the first meal
-        } else {
-          setMeal(null);
-        }
-      } catch (err) {
-        setError("Failed to fetch meal data");
+      if (data) {
+        setMeals(data);
+        setError(null);
+      } else {
+        setMeals([]);
+        setError("No meals found");
       }
-    };
-
-    fetchMeal();
-  }, []);
+    } catch (err) {
+      setError("Failed to fetch meal data");
+      setMeals([]);
+    }
+  };
 
   return (
-    <div>
-      <h1>Meal Details</h1>
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h1>Search Meals</h1>
+      <div style={{ marginBottom: "20px" }}>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search for a meal..."
+          style={{
+            padding: "10px",
+            width: "300px",
+            borderRadius: "5px",
+            border: "1px solid #ccc",
+          }}
+        />
+        <button
+          onClick={handleSearch}
+          style={{
+            padding: "10px 20px",
+            marginLeft: "10px",
+            borderRadius: "5px",
+            background: "#007BFF",
+            color: "white",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Search
+        </button>
+      </div>
       {error && <p style={{ color: "red" }}>{error}</p>}
-      {meal ? (
-        <div>
-          <h2>{meal.strMeal}</h2>
-          <img
-            src={meal.strMealThumb}
-            alt={meal.strMeal}
-            style={{ width: "300px" }}
-          />
-          <p>
-            <strong>Category:</strong> {meal.strCategory}
-          </p>
-          <p>
-            <strong>Area:</strong> {meal.strArea}
-          </p>
-          <p>
-            <strong>Instructions:</strong> {meal.strInstructions}
-          </p>
-          {meal.strYoutube && (
-            <p>
+      {meals && meals.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+          {meals.map((meal) => (
+            <div key={meal.idMeal} style={{ textAlign: "center" }}>
+              <img
+                src={meal.strMealThumb}
+                alt={meal.strMeal}
+                style={{ width: "200px", borderRadius: "10px" }}
+              />
+              <h3>{meal.strMeal}</h3>
+              <p>
+                <strong>Category:</strong> {meal.strCategory}
+              </p>
+              <p>
+                <strong>Area:</strong> {meal.strArea}
+              </p>
               <a
                 href={meal.strYoutube}
                 target="_blank"
                 rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  marginTop: "10px",
+                  padding: "5px 10px",
+                  background: "#007BFF",
+                  color: "white",
+                  borderRadius: "5px",
+                  textDecoration: "none",
+                }}
               >
                 Watch on YouTube
               </a>
-            </p>
-          )}
+            </div>
+          ))}
         </div>
-      ) : (
-        <p>No meal found</p>
       )}
     </div>
   );
