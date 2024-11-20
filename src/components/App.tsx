@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./Home";
 import BestRecipesPage from "./BestRecipes";
-import OneRecipe from "./OneRecipe";
+import OneRecipe from "../OneRecipe";
 
 interface Category {
   idCategory: string;
